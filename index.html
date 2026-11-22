@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ArterOps OS</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+  <div id="page-jobs" class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-title">ArterOps</div>
+        <div style="display: flex; gap: 6px; align-items: center; position: relative;">
+          <span class="count-badge" id="job-count">0</span>
+          <span class="count-badge" id="job-days-load">~0 дн.</span>
+          
+          <button class="burger-btn" onclick="toggleMenu(event)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          
+          <div id="dropdown-menu" class="dropdown-menu" style="display: none;">
+            <div class="menu-item active" onclick="switchPage('page-jobs')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              Реестр проектов
+            </div>
+            <div class="menu-item" data-feature="enable_knowledge_base" onclick="switchPage('page-knowledge')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z"/></svg>
+              База знаний
+            </div>
+            <div class="menu-item" data-feature="enable_team_module" onclick="switchPage('page-team')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; display: inline-block; flex-shrink: 0;">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              Команда
+            </div>
+            <div class="menu-item" data-feature="enable_fintech_and_taxes" onclick="switchPage('page-stats')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              Финансовая сводка
+            </div>
+            <div class="menu-item" onclick="switchPage('page-resume')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
+              Системный профиль
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="daily-plan-box" class="daily-plan-card" data-feature="enable_ai_morning_planner" style="display: none;">
+        <div class="daily-plan-header">
+          <div class="daily-plan-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Координатор задач</span>
+            <span id="plan-time-badge" class="plan-time-badge">~0ч</span>
+          </div>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <button id="btn-toggle-note" class="btn-refresh-plan" onclick="togglePlanNoteBox()" title="Лимиты и вводные">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+            </button>
+            <button id="btn-refresh-plan" class="btn-refresh-plan" onclick="refreshDailyPlan()" title="Пересчитать план">
+              <svg class="refresh-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="plan-note-box" style="display: none; margin: 8px 0; padding: 8px; background: var(--bg-surface, #1e1e2e); border-radius: 8px; border: 1px dashed var(--accent-primary);">
+          <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Вводные параметры для ИИ:
+          </div>
+          <textarea id="plan-note-input" class="input-details" rows="2" placeholder="Фокусные задачи, жесткие лимиты времени или запрос на выходной..." style="width: 100%; resize: none; font-size: 12px;"></textarea>
+          <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px;">
+            <button class="chip" onclick="clearPlanNote()" style="font-size: 11px;">Сбросить ✕</button>
+            <button class="chip" onclick="savePlanNote()" style="font-size: 11px; background: rgba(0, 255, 204, 0.1); border-color: var(--accent-primary); color: var(--accent-primary);">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 2px;"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Зафиксировать
+            </button>
+          </div>
+        </div>
+
+        <div id="plan-active-note-badge" style="display: none; font-size: 11px; background: rgba(177, 66, 245, 0.1); border-left: 3px solid var(--accent-secondary); padding: 4px 8px; margin: 6px 0; border-radius: 4px; color: var(--accent-secondary);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <b>Параметры:</b> <span id="plan-active-note-text"></span>
+        </div>
+        
+        <div id="daily-plan-tasks" class="daily-plan-list"></div>
+
+        <div id="daily-bonus-box" class="daily-bonus-box" data-feature="enable_task_bonus_system" style="display: none;">
+          <div class="daily-bonus-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Дополнительный профит
+          </div>
+          <div id="daily-bonus-tasks" class="daily-plan-list"></div>
+        </div>
+        
+        <div id="daily-plan-quote" class="daily-plan-quote"></div>
+      </div>
+
+      <div class="sort-bar">
+        <button class="sort-btn active" id="sort-deadline" onclick="setSort('deadline')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Сроки
+        </button>
+        <button class="sort-btn" id="sort-hours" onclick="setSort('hours')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Трудозатраты
+        </button>
+      </div>
+
+      <div id="cards-container" class="cards-list"></div>
+
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        <h3>Ожидание лидов</h3>
+        <p>Активные проекты в реестре отсутствуют.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="page-stats" class="page-container" style="display: none;" data-feature="enable_fintech_and_taxes">
+    <div class="content-wrapper">
+      
+      <div class="light-header">
+        <button class="back-link" onclick="switchPage('page-jobs')">← Назад</button>
+        <div class="light-title">Финансы</div>
+        <button class="tax-badge-btn" onclick="openTaxModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Налоги
+        </button>
+      </div>
+
+      <div class="filters-card">
+        <div class="filter-row">
+          <label>Временной период:</label>
+          <select id="stat-period" onchange="loadStatsData()">
+            <option value="month" selected>Текущий месяц</option>
+            <option value="3months">Квартал</option>
+            <option value="year">Текущий год</option>
+            <option value="all">Весь период</option>
+          </select>
+        </div>
+        <div class="filter-row">
+          <label>Источник лидов:</label>
+          <select id="stat-platform" onchange="loadStatsData()">
+            <option value="all" selected>Все источники</option>
+          </select>
+        </div>
+        <button class="btn-filter-apply" onclick="loadStatsData()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Проанализировать
+        </button>
+      </div>
+
+      <div class="pure-income-card">
+        <div class="pure-label">Чистая прибыль (Net)</div>
+        <div class="pure-value" id="stat-pure-profit">0.00 RUB</div>
+        <div class="pure-subtext">С учетом комиссий площадок и налоговых отчислений</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="metric-card">
+          <div class="metric-title">Оборот (Gross)</div>
+          <div class="metric-val" id="stat-raw">0.00 RUB</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Комиссии сервисов</div>
+          <div class="metric-val danger" id="stat-fee">0.00 RUB</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Налоги</div>
+          <div class="metric-val warning" id="stat-tax">0.00 RUB</div>
+        </div>
+      </div>
+
+      <div id="donut-section" class="donut-card" style="display: none;">
+        <div class="donut-header">Структура выручки</div>
+        <div class="donut-container">
+          <svg viewBox="0 0 50 50" class="donut-svg">
+            <circle class="donut-ring" cx="25" cy="25" r="18" fill="transparent" stroke-width="7"></circle>
+            <circle id="donut-active" class="donut-segment" cx="25" cy="25" r="18" fill="transparent" stroke="var(--accent-primary)" stroke-width="7" stroke-dasharray="70 30" stroke-dashoffset="25"></circle>
+            <circle id="donut-passive" class="donut-segment" cx="25" cy="25" r="18" fill="transparent" stroke="var(--accent-secondary)" stroke-width="7" stroke-dasharray="30 70" stroke-dashoffset="95"></circle>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item">
+              <span class="legend-dot active-dot" style="background: var(--accent-primary);"></span>
+              <div>Активные сделки:<br><b id="stat-active-val">0 RUB</b></div>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot passive-dot" style="background: var(--accent-secondary);"></span>
+              <div>Лицензии / Пассив:<br><b id="stat-passive-val">0 RUB</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="modal-overlay" id="job-modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div id="view-details">
+
+        <div class="modal-header">
+          <div class="modal-title" id="m-title">Идентификатор заказа</div>
+          <button class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+
+        <div class="card-details" style="padding-top: 10px; border: none;">
+          <span class="budget" id="m-budget">0 RUB</span>
+          <span class="hours" id="m-hours">0ч / 0ч</span>
+        </div>
+
+        <div class="contact-box-row">
+          <div style="flex:1;">
+            <span class="form-label" style="font-size:10px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: baseline;"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Контакт заказчика
+            </span>
+            <input type="text" id="m-contact-input" class="form-input" style="width:100%; margin-top:2px;" placeholder="TG / Email">
+          </div>
+          <button class="chip" style="align-self:flex-end; background: rgba(0, 255, 204, 0.1); border-color: var(--accent-primary); color: var(--accent-primary); height:34px;" onclick="saveJobContact()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          </button>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="modal-section-title">Производственный план</div>
+          <div class="modal-section" id="m-tasks">Этапы не сформированы.</div>
+        </div>
+        
+        <div style="margin-top: 10px;">
+          <div class="modal-section-title">Техническое задание</div>
+          <div class="modal-section" id="m-desc">Спецификация отсутствует.</div>
+        </div>
+
+        <div style="margin-top: 10px;" data-feature="enable_team_module">
+          <div class="modal-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; display: inline-block; flex-shrink: 0;">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              Исполнители
+            </span>
+          </div>
+          <div id="m-assigned-team-chips" class="assigned-chips-container"></div>
+        </div>
+
+        <div style="margin-top: 10px;" data-feature="enable_time_tracker">
+          <div class="modal-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Учет времени (за сегодня)</span>
+            </span>
+            <span id="m-today-time" class="hours-badge" style="font-size: 11px; font-weight: 700; color: var(--accent-primary); background: rgba(0,255,204,0.1); border: 1px solid var(--accent-primary); padding: 2px 7px; border-radius: 10px;">00:00</span>
+          </div>
+          <div class="timelog-box">
+            <div class="timer-display-row">
+              <div class="timer-digits" id="timer-val">00:00</div>
+              <div class="timer-controls">
+                <button class="btn-timer btn-start" id="btn-start" onclick="startTimer()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Старт
+                </button>
+                <button class="btn-timer btn-pause" id="btn-pause" onclick="pauseTimer()" style="display:none; align-items: center;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px; flex-shrink: 0;"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Пауза
+                </button>
+                <button class="btn-timer btn-save" id="btn-save" onclick="saveTimer()" style="display:none; align-items: center;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; flex-shrink: 0;"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> В БД
+                </button>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 6px;" data-feature="enable_team_module">
+              <span class="form-label" style="font-size: 10px;">Ответственный специалист</span>
+              <select id="timelog-member-select" class="form-select" style="padding: 4px 8px; font-size: 11px;">
+                <option value="">Не указан / Общий</option>
+              </select>
+            </div>
+            <div class="quick-chips">
+              <span style="font-size: 11px; color: var(--text-muted);">Быстрый ввод:</span>
+              <button class="chip" onclick="quickAddTime(15)">+15м</button>
+              <button class="chip" onclick="quickAddTime(30)">+30м</button>
+              <button class="chip" onclick="quickAddTime(45)">+45м</button>
+              <button class="chip" onclick="quickAddTime(60)">+1ч</button>
+            </div>
+            <div class="manual-time-row">
+              <input type="number" id="manual-mins" class="input-minutes" placeholder="Ввод вручную">
+              <button class="btn-add-time" onclick="submitManualTime()">+ Зафиксировать</button>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="work-details" class="input-details" placeholder="Выполненные работы...">
+              <button class="chip" style="background: rgba(177, 66, 245, 0.1); border-color: var(--accent-secondary); color: var(--accent-secondary); white-space: nowrap;" onclick="saveDetailsOnly()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Текст
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div class="modal-section-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            Заметки и доступы
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <textarea id="m-notes-input" class="input-details" rows="3" placeholder="Среды разработки, API ключи, репозитории..." style="resize:vertical; width:100%; min-height: 4rem;"></textarea>
+            <button class="chip" style="align-self:flex-end; background: rgba(0, 255, 204, 0.1); border-color: var(--accent-primary); color: var(--accent-primary);" onclick="saveJobNotes()">Сохранить данные</button>
+          </div>
+        </div>
+
+        <div id="m-chat-section" style="margin-top: 12px; display: none;">
+          <div class="modal-section-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            История переписки
+          </div>
+          <div id="m-chat-history" class="chat-thread-box"></div>
+        </div>
+
+        <div class="modal-actions-row">
+          <a id="m-link" href="#" target="_blank" class="modal-link-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+            Платформа
+          </a>
+          <button class="modal-complete-btn" data-feature="enable_fintech_and_taxes" onclick="openCompleteDealView()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Завершить сделку
+          </button>
+        </div>
+      </div>
+
+      <div id="view-complete" style="display: none;" data-feature="enable_fintech_and_taxes">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom;"><polyline points="20 6 9 17 4 12"/></svg>
+              Закрытие контракта
+            </div>
+            <div id="deal-sub-title" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;"></div>
+          </div>
+          <button class="close-btn" onclick="backToDetailsView()">✕</button>
+        </div>
+        <div class="complete-form" style="margin-top: 10px;">
+          <div class="form-group">
+            <span class="form-label">Платформа расчетов</span>
+            <select id="deal-platform" class="form-select" onchange="onPlatformChange()"></select>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex: 2;">
+              <span class="form-label">Сумма поступления</span>
+              <input type="number" id="deal-amount" class="form-input" oninput="recalcDeal()">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <span class="form-label">Валюта</span>
+              <input type="text" id="deal-currency" class="form-input" readonly>
+            </div>
+          </div>
+          <div class="form-group" id="tax-status-box">
+            <span class="form-label">Налоговая ставка</span>
+            <select id="deal-tax-status" class="form-select" onchange="onTaxStatusChange()">
+              <option value="4">ФЛ (4%)</option>
+              <option value="6">ЮЛ (6%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <span class="form-label">Статус оплаты налога</span>
+            <select id="deal-tax-paid" class="form-select">
+              <option value="false">В ожидании</option>
+              <option value="true">Оплачен</option>
+            </select>
+          </div>
+          <div class="profit-summary-box">
+            <div>Издержки платформы: <span id="calc-fee">0</span> <span class="calc-curr">RUB</span></div>
+            <div>Налог (<span id="calc-tax-percent">4</span>%): <span id="calc-tax">0</span> <span class="calc-curr">RUB</span></div>
+            <div style="margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1);">
+              <span>Чистая выручка:</span>
+              <div class="profit-value" id="calc-pure-profit">0 RUB</div>
+            </div>
+          </div>
+          <div class="modal-actions-row">
+            <button class="modal-link-btn" onclick="backToDetailsView()">Отмена</button>
+            <button class="modal-complete-btn" onclick="submitCompleteDeal()">Подтвердить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-knowledge" class="page-container" style="display: none;" data-feature="enable_knowledge_base">
+    <div class="content-wrapper">
+      <div class="light-header">
+        <button class="back-link" onclick="switchPage('page-jobs')">← Назад</button>
+        <div class="light-title">База знаний</div>
+        <button class="chip" style="background: var(--accent-primary); color: #fff; font-weight: 700; border: none; padding: 6px 12px;" onclick="openKnowledgeModal()">Добавить</button>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <div style="position: relative; display: flex; align-items: center;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="knowledge-search-input" class="form-input" style="width: 100%; padding-left: 34px;" placeholder="Поиск по статьям и тегам..." oninput="filterKnowledgeCards()">
+        </div>
+      </div>
+
+      <div id="knowledge-cards-container" class="cards-list"></div>
+
+      <div id="knowledge-empty-state" class="empty-state" style="display: none;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z"/></svg>
+        <h3>Реестр пуст</h3>
+        <p>Добавьте проектные регламенты, ссылки или компоненты.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="knowledge-modal" onclick="closeKnowledgeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="km-header-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
+          Документ базы
+        </div>
+        <button class="close-btn" onclick="closeKnowledgeModal()">✕</button>
+      </div>
+
+      <input type="hidden" id="km-edit-id" value="">
+
+      <div class="complete-form" style="margin-top: 10px;">
+        <div class="form-group">
+          <span class="form-label">Заголовок</span>
+          <input type="text" id="km-title-input" class="form-input" placeholder="Регламент работы / Данные о продукте">
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Теги (через запятую)</span>
+          <input type="text" id="km-keywords-input" class="form-input" placeholder="документ, правила, ссылки">
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Краткая сводка</span>
+          <input type="text" id="km-desc-input" class="form-input" placeholder="Краткое описание содержимого">
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Полный текст документа</span>
+          <textarea id="km-content-input" class="input-details" rows="7" placeholder="Опишите процессы, прикрепите ссылки на материалы или сервисы..." style="resize: vertical; min-height: 140px;"></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button class="modal-link-btn" onclick="closeKnowledgeModal()">Закрыть</button>
+          <button class="modal-complete-btn" id="btn-save-knowledge" onclick="submitKnowledgeForm()">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-team" class="page-container" style="display: none;" data-feature="enable_team_module">
+    <div class="content-wrapper">
+      <div class="light-header">
+        <button class="back-link" onclick="switchPage('page-jobs')">← Назад</button>
+        <div class="light-title">Команда</div>
+        <button class="chip" style="background: var(--accent-primary); color: #fff; font-weight: 700; border: none; padding: 6px 12px;" onclick="openTeamModal()">Добавить</button>
+      </div>
+
+      <div id="team-limit-bar" class="team-limit-card">
+        <div>Доступ по тарифу: <b>Активен</b></div>
+        <div id="team-counter-badge" class="count-badge" style="background: rgba(0, 255, 204, 0.1); border-color: var(--accent-primary); color: var(--accent-primary);">0 / 0</div>
+      </div>
+
+      <div id="team-upgrade-banner" style="display: none; margin-bottom: 12px; padding: 10px 14px; background: rgba(177, 66, 245, 0.08); border: 1px solid var(--accent-secondary); border-radius: 8px; justify-content: space-between; align-items: center; gap: 8px;">
+        <div style="font-size: 11px; color: var(--text-main); line-height: 1.35;">
+          <b>Лимит команды исчерпан</b><br>
+          <span style="color: var(--text-muted);">Вы можете подключить дополнительные слоты!</span>
+        </div>
+        <button class="chip" style="background: var(--accent-secondary); color: #fff; border: none; white-space: nowrap; font-size: 11px; padding: 6px 12px; font-weight: 600; cursor: pointer;" onclick="openUpgradeContact('trefelova')">
+          Докупить слоты ⚡
+        </button>
+      </div>
+
+      <div id="team-cards-container" class="cards-list"></div>
+
+      <div id="team-empty-state" class="empty-state" style="display: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; display: inline-block; flex-shrink: 0;">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <h3>Сотрудники не найдены</h3>
+        <p>Добавьте специалистов для распределения нагрузки.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="team-modal" onclick="closeTeamModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="tm-header-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Учетная запись
+        </div>
+        <button class="close-btn" onclick="closeTeamModal()">✕</button>
+      </div>
+
+      <div class="complete-form" style="margin-top: 10px;">
+        <div class="form-group">
+          <span class="form-label">Идентификатор / ФИО</span>
+          <input type="text" id="tm-name-input" class="form-input" placeholder="UX/UI Дизайнер">
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Должность</span>
+          <input type="text" id="tm-role-input" class="form-input" placeholder="Product Designer">
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Связь в Telegram (@username)</span>
+          <input type="text" id="tm-tg-input" class="form-input" placeholder="@username">
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Аватар сотрудника</span>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+            <div id="tm-avatar-preview" class="team-avatar" style="width: 44px; height: 44px; font-size: 14px; background: rgba(0, 255, 204, 0.1); color: var(--accent-primary); flex-shrink: 0;">?</div>
+            
+            <label class="chip" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; margin: 0; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span id="tm-file-label-text">Выбрать фото</span>
+              <input type="file" id="tm-avatar-file" accept="image/*" style="display: none;" onchange="previewAvatar(event)">
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Технический стек</span>
+          <input type="text" id="tm-skills-input" class="form-input" placeholder="Figma, Spline, Principle, Webflow">
+        </div>
+
+        <div class="form-group">
+          <span class="form-label">Компетенции и лимиты</span>
+          <textarea id="tm-desc-input" class="input-details" rows="3" placeholder="Специализация на мобильных интерфейсах, работает 4ч/день..." style="resize: vertical;"></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button class="modal-link-btn" onclick="closeTeamModal()">Отмена</button>
+          <button class="modal-complete-btn" id="btn-save-team" onclick="submitTeamForm()">Сохранить профиль</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="tax-modal" onclick="closeTaxModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Задолженность
+        </div>
+        <button class="close-btn" onclick="closeTaxModal()">✕</button>
+      </div>
+      <div id="unpaid-taxes-list" class="cards-list" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <div id="page-resume" class="page-container" style="display: none;">
+    <div class="content-wrapper">
+      <div class="light-header">
+        <button class="back-link" onclick="switchPage('page-jobs')">← Назад</button>
+        <div class="light-title">Системный профиль</div>
+        <button class="chip" id="btn-save-resume-top" style="background: var(--accent-primary); color: #fff; font-weight: 700; border: none; padding: 6px 14px;" onclick="saveResumeText()">Зафиксировать</button>
+      </div>
+
+      <div class="team-limit-card" style="margin-top: 4px; line-height: 1.4;">
+        <div>
+          <div style="font-weight: 700; color: var(--text-main); margin-bottom: 2px;">Рабочий контекст для алгоритмов анализа</div>
+          <div style="font-size: 11px; color: var(--text-muted);">
+            Данный блок используется в качестве корневого промпта для большинства запросов. Опишите специализацию, бизнес-процессы, стек и правила ценообразования.
+          </div>
+        </div>
+      </div>
+
+      <div class="complete-form" style="margin-top: 8px;">
+        <textarea id="resume-text-input" class="input-details" rows="18" placeholder="Синхронизация профиля..." style="resize: none; min-height: 320px; font-size: 12px; line-height: 1.45;"></textarea>
+        
+        <div class="modal-actions-row" style="margin-top: 10px;">
+          <button class="modal-link-btn" onclick="switchPage('page-jobs')">Сбросить</button>
+          <button class="modal-complete-btn" id="btn-save-resume-bottom" onclick="saveResumeText()">Сохранить конфигурацию</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-notify" class="toast-msg"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
